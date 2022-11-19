@@ -1,4 +1,24 @@
 #sunburst {
   width: 800px;
   margin: auto;
+
+  position: relative;
+
+  .center-data {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 0;
+
+    .name {
+      font-weight: bold;
+    }
+  }
+
+  svg {
+    z-index: 10;
+  }
 }
+

@@ -1,19 +1,20 @@
-import { Lecturer } from 'src/app/model/lecturer';
+import { LecturerAggregation } from 'src/app/model/lecturer-aggregation';
 import { TreeNode } from './../model/tree-node';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
+import { PublicationRecord } from '../model/publication-record';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicationService {
 
-  private lecturers: Lecturer[] = [];
+  private lecturers: LecturerAggregation[] = [];
   private lecturersTree: TreeNode = new TreeNode("", "", null);
 
-  public lecturerList: Observable<Lecturer[]>;
+  public lecturerList: Observable<LecturerAggregation[]>;
   private lecturerListSubject: BehaviorSubject<any>;
   public lecturerTree: Observable<TreeNode>;
   private lecturerTreeSubject: BehaviorSubject<any>;
@@ -21,10 +22,11 @@ export class PublicationService {
   public sunburstSelection: Observable<TreeNode>;
   private sunburstSelectionSubject: BehaviorSubject<any>;
 
+  private rawData: PublicationRecord[] = [];
 
   constructor(private httpClient: HttpClient) {
 
-    this.lecturerListSubject = new BehaviorSubject<Lecturer[]>(this.lecturers);
+    this.lecturerListSubject = new BehaviorSubject<LecturerAggregation[]>(this.lecturers);
     this.lecturerList = this.lecturerListSubject.asObservable();
 
     this.lecturerTreeSubject = new BehaviorSubject<TreeNode>(this.lecturersTree);
@@ -41,13 +43,23 @@ export class PublicationService {
       .subscribe(result => {
         result.forEach((record: { id: string; year: number; pubs: number; name: string; department: string; faculty: string; university: string; }) => {
 
+          this.rawData.push(new PublicationRecord(
+            record.id,
+            record.name,
+            record.pubs,
+            record.year,
+            record.department,
+            record.faculty,
+            record.university
+          ));
+
           const existingLecturer = this.lecturers.filter(publication => publication.id === record.id);
           if (existingLecturer.length > 0) {
             // add to existing object
             existingLecturer[0].addPublication(record.year, record.pubs);
           } else {
             // add new lecturer
-            this.lecturers.push(new Lecturer(
+            this.lecturers.push(new LecturerAggregation(
               record.id,
               record.name,
               record.year,
@@ -77,11 +89,13 @@ export class PublicationService {
     const universities = new Map<string, string>();
     const faculties = new Map<string, string>();
     const departments = new Map<string, string>();
+    const lecturers = new Map<string, string>();
 
-    this.lecturers.forEach(lecturer => {
+    this.rawData.forEach(lecturer => {
       universities.set(lecturer.university, "");
       faculties.set(lecturer.faculty, lecturer.university);
       departments.set(lecturer.department, lecturer.faculty);
+      lecturers.set(lecturer.name, lecturer.department);
     });
 
     // create tree out of gathered data
@@ -91,41 +105,50 @@ export class PublicationService {
       this.lecturersTree = rootNode;
 
       faculties.forEach((facuValue, facuKey) => {
-          if (facuValue == uniKey) {
-            var facuNode = new TreeNode(facuKey, "faculty", rootNode);
-            rootNode.addChild(facuNode);
+        if (facuValue == uniKey) {
+          var facuNode = new TreeNode(facuKey, "faculty", rootNode);
+          rootNode.addChild(facuNode);
 
-            departments.forEach((depValue, depKey) => {
-              if (depValue == facuKey) {
-                var depNode = new TreeNode(depKey, "department", facuNode);
-                facuNode.addChild(depNode);
+          departments.forEach((depValue, depKey) => {
+            if (depValue == facuKey) {
+              var depNode = new TreeNode(depKey, "department", facuNode);
+              facuNode.addChild(depNode);
 
-                this.lecturers
-                  .filter(function(lecturer: Lecturer) {
-                    return lecturer.department == depKey;
-                  })
-                  .forEach(lecturer => {
-                    depNode.addChild(lecturer);
-                    lecturer.setParent(depNode);
-                  });
-              }
-            });
-          }
-        });
+              lecturers.forEach((lectValue, lectKey) => {
+                if (lectValue == depKey) {
+                  var lectNode = new TreeNode(lectKey, "lecturer", depNode);
+                  depNode.addChild(lectNode);
+
+                  this.rawData
+                    .filter(function (publications: PublicationRecord) {
+                      return publications.name == lectKey;
+                    })
+                    .forEach(publications => {
+                      lectNode.addChild(publications);
+                      publications.setParent(lectNode);
+                    });
+                }
+              });
+
+
+            }
+          });
+        }
+      });
     });
 
     this.lecturersTree.updatePubs();
-
+    console.log(this.lecturersTree);
   }
 
 
-  setSunburstSelection(selection: TreeNode | Lecturer | null) {
+  setSunburstSelection(selection: TreeNode | PublicationRecord | null) {
     this.sunburstSelectionSubject.next(selection);
   }
 
-  getTreeAsFlatList(selection: TreeNode | Lecturer): Lecturer[] {
-    var list: Lecturer[] = [];
-    if (selection instanceof Lecturer) {
+  getTreeAsFlatList(selection: TreeNode | PublicationRecord): PublicationRecord[] {
+    var list: PublicationRecord[] = [];
+    if (selection instanceof PublicationRecord) {
       list.push(selection);
     } else {
       selection.children.forEach(child => {
@@ -133,6 +156,11 @@ export class PublicationService {
       });
     }
     return list;
+  }
+
+  recordsAsAggregations(records: PublicationRecord[]): LecturerAggregation[] {
+    const ids = records.map(record => record.id);
+    return this.lecturers.filter(d => ids.includes(d.id));
   }
 
 }

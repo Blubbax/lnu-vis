@@ -1,4 +1,9 @@
 <div class="container view-container">
   <app-breadcrumb [dataElement]="selectedElement"></app-breadcrumb>
-  <div id="sunburst"></div>
+  <div id="sunburst">
+    <div class="center-data">
+      <span class="name">{{ currentName }}</span><br>
+      {{ currentPublications }} Publications
+    </div>
+  </div>
 </div>

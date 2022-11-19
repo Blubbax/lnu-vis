@@ -1,7 +1,3 @@
 <app-d3-sunburst></app-d3-sunburst>
 
-<!-- <app-sunburst></app-sunburst>
-<app-scatterplot [data]="lecturers" [xAttribute]="'faculty'" [yAttribute]="'totalPubs'" [categoricalAttribute]="'department'" [title]="'Test'"></app-scatterplot>
-<app-violin></app-violin>
--->
-<app-table [data]="lecturers" [attributes]="['name', 'totalPubs', 'id']" [selectedAttributes]="['name', 'totalPubs']" ></app-table>
+<app-table [data]="lecturersAggregated" [attributes]="['id', 'name', 'totalPubs', 'publications2019', 'publications2020', 'department', 'faculty', 'university']" [selectedAttributes]="['name', 'totalPubs']" ></app-table>

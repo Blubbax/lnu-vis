@@ -1,6 +1,8 @@
+import { LecturerAggregation } from 'src/app/model/lecturer-aggregation';
+import { PublicationRecord } from './../../model/publication-record';
 import { PublicationService } from './../../service/publication.service';
 import { Component, OnInit } from '@angular/core';
-import { Lecturer } from 'src/app/model/lecturer';
+
 
 @Component({
   selector: 'app-visualization',
@@ -9,7 +11,9 @@ import { Lecturer } from 'src/app/model/lecturer';
 })
 export class VisualizationComponent implements OnInit {
 
-  public lecturers : Lecturer[] = [];
+  public lecturers : PublicationRecord[] = [];
+  public lecturersAggregated : LecturerAggregation[] = [];
+
 
   constructor(private publicationService: PublicationService) {
     // this.publicationService.lecturerList.subscribe(lecturers => {
@@ -18,7 +22,8 @@ export class VisualizationComponent implements OnInit {
     // });
     this.publicationService.sunburstSelection.subscribe(data => {
       this.lecturers = this.publicationService.getTreeAsFlatList(data);
-      console.log(this.lecturers);
+      this.lecturersAggregated = this.publicationService.recordsAsAggregations(this.lecturers)
+      console.log(this.lecturersAggregated);
     });
   }
 

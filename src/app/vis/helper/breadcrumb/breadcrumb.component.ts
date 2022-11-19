@@ -1,4 +1,4 @@
-import { Lecturer } from 'src/app/model/lecturer';
+import { PublicationRecord } from './../../../model/publication-record';
 import { TreeNode } from './../../../model/tree-node';
 import { Component, OnInit, Input } from '@angular/core';
 
@@ -9,7 +9,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class BreadcrumbComponent implements OnInit {
 
-  @Input() dataElement: TreeNode | Lecturer | null = null;
+  @Input() dataElement: TreeNode | PublicationRecord | null = null;
   breadcrumItems: string[] = [];
 
   constructor() { }

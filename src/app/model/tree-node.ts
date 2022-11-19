@@ -1,25 +1,31 @@
-import { Lecturer } from 'src/app/model/lecturer';
+import { PublicationRecord } from './publication-record';
+
 export class TreeNode {
 
   public name: string;
   public layer: string;
   public parent: TreeNode | null;
-  public children: (Lecturer | TreeNode)[];
+  public children: (PublicationRecord | TreeNode)[];
   public totalChildPubs: number;
-  public printableName: string;
+  public label: string;
+  public nameShort: string;
 
   constructor(name: string, layer: string = "", parent: (TreeNode | null)) {
     this.name = name;
     this.layer = layer;
-    this.printableName = name;
     this.parent = parent;
     this.children = [];
     this.totalChildPubs = 0;
+    this.nameShort = name;
 
-    this.determinePrintableName();
+    var substrings = name.match(/\((.*?)\)/);
+    if (substrings) {
+      this.nameShort = substrings[1];
+    }
+    this.label = this.nameShort;
   }
 
-  addChild(child: Lecturer | TreeNode) {
+  addChild(child: PublicationRecord | TreeNode) {
     this.children.push(child);
   }
 
@@ -27,8 +33,8 @@ export class TreeNode {
     this.totalChildPubs = 0;
 
     this.children.forEach(child => {
-      if (child instanceof Lecturer) {
-        this.totalChildPubs += child.totalPubs;
+      if (child instanceof PublicationRecord) {
+        this.totalChildPubs += child.publications;
       } else {
         this.totalChildPubs += child.updatePubs();
       }
@@ -37,24 +43,5 @@ export class TreeNode {
     return this.totalChildPubs;
   }
 
-  private determinePrintableName() {
-    const length = this.printableName.length;
-    var nameParts = this.printableName.split(" ");
-    var wordsPerLine = 3;
-    var currentWords = 0;
-
-    this.printableName = "";
-    nameParts.forEach(part => {
-      if (currentWords < wordsPerLine) {
-        currentWords++;
-        this.printableName += part + " "
-      } else {
-        currentWords = 0;
-        this.printableName += part + " "
-      }
-    })
-
-
-  }
 
 }
