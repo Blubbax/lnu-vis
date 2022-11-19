@@ -15,6 +15,8 @@ import { SunburstComponent } from './vis/sunburst/sunburst.component';
 import { ViolinComponent } from './vis/violin/violin.component';
 import { ScatterplotComponent } from './vis/scatterplot/scatterplot.component';
 import { D3SunburstComponent } from './vis/d3/d3-sunburst/d3-sunburst.component';
+import { BreadcrumbComponent } from './vis/helper/breadcrumb/breadcrumb.component';
+import { BreadcrumbItemComponent } from './vis/helper/breadcrumb-item/breadcrumb-item.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { D3SunburstComponent } from './vis/d3/d3-sunburst/d3-sunburst.component'
     SunburstComponent,
     ViolinComponent,
     ScatterplotComponent,
-    D3SunburstComponent
+    D3SunburstComponent,
+    BreadcrumbComponent,
+    BreadcrumbItemComponent
   ],
   imports: [
     BrowserModule,

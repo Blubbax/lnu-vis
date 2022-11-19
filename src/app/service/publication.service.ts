@@ -4,7 +4,6 @@ import { TreeNode } from './../model/tree-node';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { rootCertificates } from 'tls';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +11,15 @@ import { rootCertificates } from 'tls';
 export class PublicationService {
 
   private lecturers: Lecturer[] = [];
-  private lecturersTree: TreeNode = new TreeNode("");
+  private lecturersTree: TreeNode = new TreeNode("", "", null);
 
   public lecturerList: Observable<Lecturer[]>;
   private lecturerListSubject: BehaviorSubject<any>;
   public lecturerTree: Observable<TreeNode>;
   private lecturerTreeSubject: BehaviorSubject<any>;
+
+  public sunburstSelection: Observable<TreeNode>;
+  private sunburstSelectionSubject: BehaviorSubject<any>;
 
 
   constructor(private httpClient: HttpClient) {
@@ -27,6 +29,9 @@ export class PublicationService {
 
     this.lecturerTreeSubject = new BehaviorSubject<TreeNode>(this.lecturersTree);
     this.lecturerTree = this.lecturerTreeSubject.asObservable();
+
+    this.sunburstSelectionSubject = new BehaviorSubject<TreeNode>(this.lecturersTree);
+    this.sunburstSelection = this.sunburstSelectionSubject.asObservable();
 
     const headers = new HttpHeaders({
       Accept: 'text/json',
@@ -57,6 +62,7 @@ export class PublicationService {
         this.lecturerListSubject.next(this.lecturers);
         this.createDataTree();
         this.lecturerTreeSubject.next(this.lecturersTree);
+        this.sunburstSelectionSubject.next(this.lecturersTree);
 
       }
       );
@@ -81,17 +87,17 @@ export class PublicationService {
     // create tree out of gathered data
 
     universities.forEach((uniValue, uniKey) => {
-      var rootNode = new TreeNode(uniKey);
-      this.lecturersTree.addChild(rootNode);
+      var rootNode = new TreeNode(uniKey, "university", null);
+      this.lecturersTree = rootNode;
 
       faculties.forEach((facuValue, facuKey) => {
           if (facuValue == uniKey) {
-            var facuNode = new TreeNode(facuKey);
+            var facuNode = new TreeNode(facuKey, "faculty", rootNode);
             rootNode.addChild(facuNode);
 
             departments.forEach((depValue, depKey) => {
               if (depValue == facuKey) {
-                var depNode = new TreeNode(depKey);
+                var depNode = new TreeNode(depKey, "department", facuNode);
                 facuNode.addChild(depNode);
 
                 this.lecturers
@@ -100,6 +106,7 @@ export class PublicationService {
                   })
                   .forEach(lecturer => {
                     depNode.addChild(lecturer);
+                    lecturer.setParent(depNode);
                   });
               }
             });
@@ -107,7 +114,25 @@ export class PublicationService {
         });
     });
 
+    this.lecturersTree.updatePubs();
+
   }
 
+
+  setSunburstSelection(selection: TreeNode | Lecturer | null) {
+    this.sunburstSelectionSubject.next(selection);
+  }
+
+  getTreeAsFlatList(selection: TreeNode | Lecturer): Lecturer[] {
+    var list: Lecturer[] = [];
+    if (selection instanceof Lecturer) {
+      list.push(selection);
+    } else {
+      selection.children.forEach(child => {
+        list = list.concat(this.getTreeAsFlatList(child));
+      });
+    }
+    return list;
+  }
 
 }

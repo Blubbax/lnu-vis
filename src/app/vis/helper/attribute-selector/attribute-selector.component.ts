@@ -25,7 +25,16 @@ export class AttributeSelectorComponent implements OnInit {
   }
 
   removeAttribute(attr: string) {
-    this.selectedAttributes = this.selectedAttributes.filter(attribute => attribute !== attr);
+    var newList: string[] = [];
+    var deleted = false;
+    this.selectedAttributes.forEach(element => {
+      if (element == attr && deleted === false) {
+        deleted = true;
+      } else {
+        newList.push(element);
+      }
+    });
+    this.selectedAttributes = newList;
     this.attributeRemoved.emit(attr);
   }
 

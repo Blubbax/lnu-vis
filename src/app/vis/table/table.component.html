@@ -12,5 +12,5 @@
     </div>
   </div>
 
-  <app-attribute-selector [attributes]="attributes" [selectedAttributes]="selectedAttributes" ></app-attribute-selector>
+  <app-attribute-selector [attributes]="attributes" [selectedAttributes]="selectedAttributes" (attributeRemoved)="attributeRemoved($event)"></app-attribute-selector>
 </div>

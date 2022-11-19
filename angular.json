@@ -34,7 +34,8 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/assets/plotly-2.14.0.min.js"
+              "src/assets/plotly-2.14.0.min.js",
+              "src/assets/d3-visualizations/sunburst.js"
             ]
           },
           "configurations": {

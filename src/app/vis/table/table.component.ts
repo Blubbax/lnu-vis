@@ -48,6 +48,18 @@ export class TableComponent implements OnInit {
     this.currentSortAttribute = attribute;
   }
 
+  attributeRemoved(attr: string) {
+    var newList: string[] = [];
+    var deleted = false;
+    this.selectedAttributes.forEach(element => {
+      if (element == attr && deleted === false) {
+        deleted = true;
+      } else {
+        newList.push(element);
+      }
+    });
+    this.selectedAttributes = newList;
+  }
 
 
 
