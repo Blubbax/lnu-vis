@@ -1,4 +1,4 @@
-// import * as d3 from 'd3';
+// inspired by https://observablehq.com/@d3/zoomable-sunburst
 
 svgCreated = false;
 
@@ -8,13 +8,10 @@ function drawSunburst(data) {
   const width = 1200;
   const radius = width / 8;
 
-
   this.figure = d3.select("div#sunburst");
-
 
   const root = partition(data);
   root.each(d => d.current = d);
-  console.log(root);
 
   var svg;
   if (svgCreated) {
@@ -31,12 +28,9 @@ function drawSunburst(data) {
   const g = svg.append("g")
     .attr("transform", `translate(${width / 2}, ${width / 2})`);
 
-
   var myColor = d3.scaleOrdinal()
     .domain(["Faculty of Technology (FTK)", "Faculty of Arts and Humanities (FKH)"])
     .range(["#7bcce7", "#cff69c"]);
-
-
 
 
   const path = g.append("g")
@@ -44,9 +38,6 @@ function drawSunburst(data) {
     .data(root.descendants().slice(1))
     .join("path")
     .attr("fill", d => { while (d.depth > 1) d = d.parent; { return myColor(d.data.label) } })
-    // .attr("fill", d => { while (d.depth > 1) d = d.parent; {return d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, 11))(d.data.name);} })
-    // .attr("fill", d => { while (d.depth > 1) d = d.parent; return d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1)); })
-    // .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
     .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.8) : 0)
     .attr("pointer-events", d => arcVisible(d.current) ? "auto" : "auto")
     .attr("d", d3.arc()
@@ -64,9 +55,7 @@ function drawSunburst(data) {
     .on("click", clicked);
 
   path.append("title")
-    .text(d => `${d.data.name}\nTotal Publications: ${(d.data.publications !== undefined ? d.data.publications : d.data.totalChildPubs)}`)
-    // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.totalPubs ? d.totalPubs : d.totalChildPubs)}`);
-
+    .text(d => `${d.data.name}\nTotal Publications: ${(d.data.publications !== undefined ? d.data.publications : d.data.totalChildPubs)}`);
 
   const label = g.append("g")
     .attr("pointer-events", "none")
@@ -106,9 +95,6 @@ function drawSunburst(data) {
 
     const t = g.transition().duration(750);
 
-    // Transition the data on all arcs, even the ones that aren’t visible,
-    // so that if this transition is interrupted, entering arcs will start
-    // the next transition from the desired position.
     path.transition(t)
       .tween("data", d => {
         const i = d3.interpolate(d.current, d.target);
@@ -158,12 +144,6 @@ function drawSunburst(data) {
     return d3.partition()
       .size([2 * Math.PI, root.height + 1])
       (root);
-  }
-
-  var color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
-
-  function format(d) {
-    return d3.format(",")
   }
 
   var myarc = d3.arc()

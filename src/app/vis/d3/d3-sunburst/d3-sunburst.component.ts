@@ -36,6 +36,8 @@ export class D3SunburstComponent implements OnInit {
         this.updateCenterData();
       });
 
+      // draw sunburst method implemented in src\assets\d3-visualizations\sunburst.js
+      // because the type checking in type script caused too much problems
       drawSunburst(this.data);
     })
   }

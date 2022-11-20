@@ -16,10 +16,6 @@ export class VisualizationComponent implements OnInit {
 
 
   constructor(private publicationService: PublicationService) {
-    // this.publicationService.lecturerList.subscribe(lecturers => {
-    //   // console.log(lecturers);
-    //   this.lecturers = lecturers;
-    // });
     this.publicationService.sunburstSelection.subscribe(data => {
       this.lecturers = this.publicationService.getTreeAsFlatList(data);
       this.lecturersAggregated = this.publicationService.recordsAsAggregations(this.lecturers)
